@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:sec="http://www.springframework.org/schema/security"
+       xmlns:oauth2="http://www.springframework.org/schema/security/oauth2"
+       xmlns:aop="http://www.springframework.org/schema/aop"
+       xmlns:tx="http://www.springframework.org/schema/tx"
+       xsi:schemaLocation="http://www.springframework.org/schema/security
+           https://www.springframework.org/schema/security/spring-security.xsd
+           http://www.springframework.org/schema/security/oauth2
+           https://www.springframework.org/schema/security/spring-security-oauth2.xsd
+           http://www.springframework.org/schema/beans
+           https://www.springframework.org/schema/beans/spring-beans.xsd
+           http://www.springframework.org/schema/aop
+           https://www.springframework.org/schema/aop/spring-aop.xsd
+           http://www.springframework.org/schema/tx
+           https://www.springframework.org/schema/tx/spring-tx.xsd">
+
+
+	<oauth2:authorization-server
+	     client-details-service-ref="clientDetailsService"
+	     token-endpoint-url="/oauth/token"
+	     token-services-ref="tokenServices">
+	    <oauth2:refresh-token /> 
+    	<oauth2:client-credentials />
+	</oauth2:authorization-server>
+	
+	<sec:http pattern="/oauth/*token*/**"
+	    authentication-manager-ref="clientAuthenticationManager">
+	    <sec:http-basic entry-point-ref="oauthAuthenticationEntryPoint" /> 
+	    <sec:csrf disabled="true"/> 
+	    <sec:intercept-url pattern="/**" access="isAuthenticated()"/> 
+	    <sec:access-denied-handler ref="oauth2AccessDeniedHandler"/> 
+	</sec:http>
+	
+	<sec:authentication-manager id="clientAuthenticationManager"> 
+	    <sec:authentication-provider user-service-ref="clientDetailsUserService" /> 
+	</sec:authentication-manager>
+	
+	<bean id="oauthAuthenticationEntryPoint" class="org.springframework.security.oauth2.provider.error.OAuth2AuthenticationEntryPoint">
+	    <property name="typeName" value="Basic" /> 
+	    <property name="realmName" value="Realm" /> 
+	</bean>
+	
+	<bean id="oauth2AccessDeniedHandler" class="org.springframework.security.oauth2.provider.error.OAuth2AccessDeniedHandler" /> 
+	
+	<bean id="clientDetailsUserService"
+	    class="org.springframework.security.oauth2.provider.client.ClientDetailsUserDetailsService"> 
+	    <constructor-arg ref="clientDetailsService" /> 
+	</bean>
+
+<!-- 
+	<bean id="userApprovalHandler"
+	      class="org.springframework.security.oauth2.provider.approval.ApprovalStoreUserApprovalHandler">
+	    <property name="clientDetailsService" ref="clientDetailsService"/>
+	    <property name="approvalStore" ref="approvalStore"/>
+	    <property name="requestFactory" ref="requestFactory"/>
+	    <property name="approvalExpiryInSeconds" value="3200" />
+	</bean>
+ -->	
+	<!-- リソースオーナからスコープ毎の認可を取得し、DBに保存して管理するための設定 -->
+	<bean id="approvalStore"
+	      class="org.springframework.security.oauth2.provider.approval.JdbcApprovalStore">
+	    <constructor-arg ref="dataSource"/>
+	</bean>
+	
+	<bean id="requestFactory"
+	      class="org.springframework.security.oauth2.provider.request.DefaultOAuth2RequestFactory">
+	    <constructor-arg ref="clientDetailsService"/>
+	</bean>
+	
+	<!-- リソースサーバへのアクセストークンのDB連携 -->
+	<bean id="tokenServices"
+	    class="org.springframework.security.oauth2.provider.token.DefaultTokenServices"> 
+	    <property name="tokenStore" ref="tokenStore" />
+	    <property name="clientDetailsService" ref="clientDetailsService" />
+	    <property name="supportRefreshToken" value="true" />  <!-- (3) -->
+	</bean>
+	
+	<bean id="tokenStore"
+	  class="org.springframework.security.oauth2.provider.token.store.JdbcTokenStore">
+	  <constructor-arg ref="dataSource" />
+	</bean>
+
+	<tx:advice id="oauthTransactionAdvice">
+	    <tx:attributes>
+	        <tx:method name="*"/>
+	    </tx:attributes>
+	</tx:advice>
+	
+	<!-- AOPを使用し、認可コードを操作する各メソッドにトランザクション境界を設定する。 -->
+	<aop:config>
+	    <aop:pointcut id="authorizationOperation"
+	                  expression="execution(* org.springframework.security.oauth2.provider.code.AuthorizationCodeServices.*(..))"/>
+	    <aop:pointcut id="approvalOperation"
+	                  expression="execution(* org.springframework.security.oauth2.provider.approval.UserApprovalHandler.*(..))"/>
+	    <aop:advisor pointcut-ref="authorizationOperation" advice-ref="oauthTransactionAdvice"/>
+	    <aop:advisor pointcut-ref="approvalOperation" advice-ref="oauthTransactionAdvice"/>
+	</aop:config>
+
+</beans>
