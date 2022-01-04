@@ -17,6 +17,8 @@ package jp.co.ntt.atrs.app.c0;
 
 import java.util.Date;
 
+import org.springframework.web.multipart.MultipartFile;
+
 /**
  * 会員情報フォームインタフェース。 共通入力値チェック、共通Bean変換処理で使用するメソッドを定義する。
  * @author NTT 電電花子
@@ -84,5 +86,25 @@ public interface IMemberForm {
      * @return クレジットカード有効期限（年）
      */
     String getCreditYear();
+    
+    /**
+     * 顔写真を取得する。
+     * @return photo 顔写真
+     */
+    public MultipartFile getPhoto();
+
+    /**
+     * 顔写真(Base64エンコード)を取得する。
+     * @return photoBase64 顔写真(Base64エンコード)
+     */
+
+    public String getPhotoBase64();
+
+    /**
+     * 顔写真ファイル名を取得する。
+     * @return photoFileName 顔写真ファイル名
+     */
+
+    public String getPhotoFileName();
 
 }

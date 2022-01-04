@@ -15,12 +15,16 @@
  */
 package jp.co.ntt.atrs.domain.service.c2;
 
-import jp.co.ntt.atrs.domain.common.exception.AtrsBusinessException;
-import jp.co.ntt.atrs.domain.common.logging.LogMessages;
-import jp.co.ntt.atrs.domain.model.Member;
-import jp.co.ntt.atrs.domain.model.MemberLogin;
-import jp.co.ntt.atrs.domain.repository.member.MemberRepository;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
 
+import javax.inject.Inject;
+
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.Resource;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -28,7 +32,13 @@ import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 import org.terasoluna.gfw.common.exception.SystemException;
 
-import javax.inject.Inject;
+import jp.co.ntt.atrs.domain.azure.helper.StorageAccountHelper;
+import jp.co.ntt.atrs.domain.common.exception.AtrsBusinessException;
+import jp.co.ntt.atrs.domain.common.logging.LogMessages;
+import jp.co.ntt.atrs.domain.common.util.ImageFileBase64Encoder;
+import jp.co.ntt.atrs.domain.model.Member;
+import jp.co.ntt.atrs.domain.model.MemberLogin;
+import jp.co.ntt.atrs.domain.repository.member.MemberRepository;
 
 /**
  * 会員情報変更を行うService実装クラス。
@@ -38,6 +48,24 @@ import javax.inject.Inject;
 @Transactional
 public class MemberUpdateServiceImpl implements MemberUpdateService {
 
+    /**
+     * ストレージアカウントコンテナ名。
+     */
+    @Value("${upload.containerName}")
+    String containerName;
+
+    /**
+     * ファイル一時保存ディレクトリ。
+     */
+    @Value("${upload.temporaryDirectory}")
+    String tmpDirectory;
+
+    /**
+     * ファイル保存ディレクトリ。
+     */
+    @Value("${upload.saveDirectory}")
+    String saveDirectory;	
+	
     /**
      * 会員情報リポジトリ。
      */
@@ -51,14 +79,38 @@ public class MemberUpdateServiceImpl implements MemberUpdateService {
     PasswordEncoder passwordEncoder;
 
     /**
+     * 画像変換ユーティリティ。
+     */
+    @Inject
+    ImageFileBase64Encoder imageFileBase64Encoder;
+
+    /**
+     * StorageAccountHelper。
+     */
+    @Inject
+    StorageAccountHelper storageAccountHelper;
+
+    /**
      * {@inheritDoc}
      */
     @Override
-    public Member findMember(String membershipNumber) {
+    @Transactional(readOnly = true)
+    public Member findMember(String membershipNumber) throws IOException{
 
         Assert.hasText(membershipNumber, "membershipNumber must have some text.");
 
-        return memberRepository.findOne(membershipNumber);
+        Member member = memberRepository.findOne(membershipNumber);
+        // 顔写真を取得する。
+        Resource photoFileResource = storageAccountHelper.getResource(containerName,
+                saveDirectory, member.getRegisteredPhotoFileName());
+        if (photoFileResource.exists()) {
+            // 顔写真が存在する場合は、顔写真データのBase64変換を行う。
+            try (InputStream photoFile = photoFileResource.getInputStream()) {
+                member.setPhotoBase64(imageFileBase64Encoder.encodeBase64(
+                        photoFile, "jpg"));
+            }
+        }
+        return member;
     }
 
     /**
@@ -91,6 +143,40 @@ public class MemberUpdateServiceImpl implements MemberUpdateService {
             if (updateMemberLoginCount != 1) {
                 throw new SystemException(LogMessages.E_AR_A0_L9002.getCode(), LogMessages.E_AR_A0_L9002
                         .getMessage(updateMemberLoginCount, 1));
+            }
+        }
+        
+
+        // 画像ファイルが選択されている場合のみ画像の更新を行う 。（photoFileNameの有無で判断する）
+        if (member.getPhotoFileName() != null) {
+            // ファイル保存を行う。
+            // 削除対象旧ファイルの検索
+            Resource[] oldPhotoResources = storageAccountHelper.fileSearch(containerName,
+                    saveDirectory, member.getMembershipNumber() + "*");
+            // 新規ファイル保存
+            String s3PhotoFileName = member.getMembershipNumber() + "_" + UUID
+                    .randomUUID().toString() + ".jpg";
+            storageAccountHelper.fileCopy(containerName, tmpDirectory, member
+                    .getPhotoFileName(), containerName, saveDirectory,
+                    s3PhotoFileName);
+
+            // 旧ファイルおよび一時ファイルの削除
+            List<String> deleteKeyList = new ArrayList<String>();
+            for (Resource oldPhotoResource : oldPhotoResources) {
+                AmazonS3URI deleteURI = storageAccountHelper.getAmazonS3URI(
+                        oldPhotoResource);
+                deleteKeyList.add(deleteURI.getKey());
+            }
+            deleteKeyList.add(tmpDirectory + member.getPhotoFileName());
+            storageAccountHelper.multiFileDelete(containerName, deleteKeyList);
+
+            // 顔写真ファイル名の更新を行う。
+            member.setRegisteredPhotoFileName(s3PhotoFileName);
+            int updateCount = memberRepository.update(member);
+            if (updateCount != 1) {
+                throw new SystemException(LogMessages.E_AR_A0_L9002
+                        .getCode(), LogMessages.E_AR_A0_L9002.getMessage(
+                                updateCount, 1));
             }
         }
     }

@@ -4,10 +4,14 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.net.URI;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.io.Resource;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -80,6 +84,30 @@ public class HelperController {
 		storageAccountHelper.fileSearch("keisamplecontainer", "tmp", "*" + "2");
 
 		return "searchsuccess";
+
+	}
+	
+	@GetMapping("/uri")
+	public String uri() throws IOException {
+		
+		Resource[] oldPhotoResources = storageAccountHelper.fileSearch("keisamplecontainer", "tmp", "*");
+		List<String> fileList = new ArrayList<String>();		
+        for (Resource oldPhotoResource : oldPhotoResources) {
+        	fileList.add(oldPhotoResource.getFilename());
+        }
+    	storageAccountHelper.multiFileDelete("keisamplecontainer", "tmp", fileList);
+
+		
+		
+		// "ランダムな文字 + temp.txt" のファイル名を作成
+		String fileName = "06114ba1-af4e-42e3-987b-77f1088d14eatemp.txt";
+		
+		Resource resource = storageAccountHelper.getResource("keisamplecontainer", "tmp", fileName);
+
+		URI uri = storageAccountHelper.getAzureStorageAccountURI(resource);
+
+//		System.out.println(uri.getPath());
+		return "urisuccess";
 
 	}
 

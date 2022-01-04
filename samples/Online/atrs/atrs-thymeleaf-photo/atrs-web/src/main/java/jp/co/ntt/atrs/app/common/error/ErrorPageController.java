@@ -67,4 +67,14 @@ public class ErrorPageController {
     public String tokenError() {
         return "common/error/token-error";
     }
+    
+
+    /**
+     * ファイルアップロードエラー画面を表示する。
+     * @return View論理名
+     */
+    @RequestMapping("fileUpload-error")
+    public String fileUploadError() {
+        return "common/error/fileUpload-error";
+    }
 }

@@ -1,4 +1,4 @@
-package com.azure.storage.storageaccountsample.helper;
+package jp.co.ntt.atrs.domain.azure.helper;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -22,6 +22,7 @@ import com.azure.storage.blob.BlobServiceClient;
 import com.azure.storage.blob.BlobServiceClientBuilder;
 import com.azure.storage.blob.specialized.BlockBlobClient;
 import com.azure.storage.common.StorageSharedKeyCredential;
+
 
 /**
  * Azure StorageAccountヘルパークラス。

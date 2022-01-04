@@ -15,25 +15,33 @@
  */
 package jp.co.ntt.atrs.app.c1;
 
+import java.io.Serializable;
+import java.util.Date;
+
+import javax.validation.constraints.Email;
+import javax.validation.constraints.Max;
+import javax.validation.constraints.Min;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
+
+import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.web.multipart.MultipartFile;
+import org.terasoluna.gfw.common.codelist.ExistInCodeList;
+
 import jp.co.ntt.atrs.app.c0.IMemberForm;
+import jp.co.ntt.atrs.app.c2.MemberUpdateForm.UploadFileCheck;
+import jp.co.ntt.atrs.app.c2.MemberUpdateForm.UploadFileNotRequired;
+import jp.co.ntt.atrs.app.c2.MemberUpdateForm.UploadFileUncheck;
+import jp.co.ntt.atrs.app.common.validate.UploadFileJpgExtension;
+import jp.co.ntt.atrs.app.common.validate.UploadFileMaxSize;
+import jp.co.ntt.atrs.app.common.validate.UploadFileNotEmpty;
+import jp.co.ntt.atrs.app.common.validate.UploadFileRequired;
 import jp.co.ntt.atrs.domain.common.validate.FixedLength;
 import jp.co.ntt.atrs.domain.common.validate.FullWidth;
 import jp.co.ntt.atrs.domain.common.validate.FullWidthKatakana;
 import jp.co.ntt.atrs.domain.common.validate.HalfWidth;
 import jp.co.ntt.atrs.domain.common.validate.HalfWidthNumber;
 import jp.co.ntt.atrs.domain.model.Gender;
-
-import org.springframework.format.annotation.DateTimeFormat;
-import org.terasoluna.gfw.common.codelist.ExistInCodeList;
-
-import java.io.Serializable;
-import java.util.Date;
-
-import javax.validation.constraints.Max;
-import javax.validation.constraints.Min;
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Size;
-import javax.validation.constraints.Email;
 
 /**
  * 会員情報登録フォーム。
@@ -186,6 +194,37 @@ public class MemberRegisterForm implements IMemberForm, Serializable {
     @NotNull
     @Min(00)
     private String creditYear;
+    
+    /**
+     * 顔写真。
+     */
+    @UploadFileRequired.List({
+            @UploadFileRequired(check = true, groups = UploadFileCheck.class),
+            @UploadFileRequired(check = false, groups = UploadFileUncheck.class),
+            @UploadFileRequired(check = false, groups = UploadFileNotRequired.class) })
+    @UploadFileNotEmpty.List({
+            @UploadFileNotEmpty(check = true, groups = UploadFileCheck.class),
+            @UploadFileNotEmpty(check = false, groups = UploadFileUncheck.class),
+            @UploadFileNotEmpty(check = true, groups = UploadFileNotRequired.class) })
+    @UploadFileMaxSize.List({
+            @UploadFileMaxSize(check = true, groups = UploadFileCheck.class),
+            @UploadFileMaxSize(check = false, groups = UploadFileUncheck.class),
+            @UploadFileMaxSize(check = true, groups = UploadFileNotRequired.class) })
+    @UploadFileJpgExtension.List({
+            @UploadFileJpgExtension(check = true, groups = UploadFileCheck.class),
+            @UploadFileJpgExtension(check = false, groups = UploadFileUncheck.class),
+            @UploadFileJpgExtension(check = true, groups = UploadFileNotRequired.class) })
+    private MultipartFile photo;
+
+    /**
+     * 顔写真(Base64エンコード)。
+     */
+    private String photoBase64;
+
+    /**
+     * 顔写真ファイル名。
+     */
+    private String photoFileName;
 
     /**
      * パスワード。
@@ -501,6 +540,72 @@ public class MemberRegisterForm implements IMemberForm, Serializable {
         this.creditYear = creditYear;
     }
 
+    /**
+     * <p>
+     * 顔写真を取得します。
+     * </p>
+     * @return photo 顔写真
+     */
+
+    public MultipartFile getPhoto() {
+        return photo;
+    }
+
+    /**
+     * <p>
+     * 顔写真を設定します。
+     * </p>
+     * @param photo 顔写真
+     */
+
+    public void setPhoto(MultipartFile photo) {
+        this.photo = photo;
+    }
+
+    /**
+     * <p>
+     * 顔写真(Base64エンコード)を取得します。
+     * </p>
+     * @return photoBase64 顔写真(Base64エンコード)
+     */
+
+    public String getPhotoBase64() {
+        return photoBase64;
+    }
+
+    /**
+     * <p>
+     * 顔写真(Base64エンコード)を設定します。
+     * </p>
+     * @param photoBase64 顔写真(Base64エンコード)
+     */
+
+    public void setPhotoBase64(String photoBase64) {
+        this.photoBase64 = photoBase64;
+    }
+
+    /**
+     * <p>
+     * 顔写真ファイル名を取得します。
+     * </p>
+     * @return photoFileName 顔写真ファイル名
+     */
+
+    public String getPhotoFileName() {
+        return photoFileName;
+    }
+
+    /**
+     * <p>
+     * 顔写真ファイル名を設定します。
+     * </p>
+     * @param photoFileName 顔写真ファイル名
+     */
+
+    public void setPhotoFileName(String photoFileName) {
+        this.photoFileName = photoFileName;
+    }    
+    
     /**
      * パスワードを取得する。
      * @return パスワード

@@ -15,6 +15,8 @@
  */
 package jp.co.ntt.atrs.domain.service.c2;
 
+import java.io.IOException;
+
 import jp.co.ntt.atrs.domain.model.Member;
 
 /**
@@ -28,7 +30,7 @@ public interface MemberUpdateService {
      * @param membershipNumber 会員番号
      * @return 会員番号に該当するユーザの会員情報
      */
-    Member findMember(String membershipNumber);
+    Member findMember(String membershipNumber) throws IOException;
 
     /**
      * 会員情報を更新する。
