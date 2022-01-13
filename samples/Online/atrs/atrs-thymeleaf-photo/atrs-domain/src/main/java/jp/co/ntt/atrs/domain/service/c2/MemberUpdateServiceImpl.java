@@ -154,24 +154,21 @@ public class MemberUpdateServiceImpl implements MemberUpdateService {
             Resource[] oldPhotoResources = storageAccountHelper.fileSearch(containerName,
                     saveDirectory, member.getMembershipNumber() + "*");
             // 新規ファイル保存
-            String s3PhotoFileName = member.getMembershipNumber() + "_" + UUID
+            String storageAccountPhotoFileName = member.getMembershipNumber() + "_" + UUID
                     .randomUUID().toString() + ".jpg";
             storageAccountHelper.fileCopy(containerName, tmpDirectory, member
                     .getPhotoFileName(), containerName, saveDirectory,
-                    s3PhotoFileName);
+                    storageAccountPhotoFileName);
 
             // 旧ファイルおよび一時ファイルの削除
-            List<String> deleteKeyList = new ArrayList<String>();
+    		List<String> fileList = new ArrayList<String>();		
             for (Resource oldPhotoResource : oldPhotoResources) {
-                AmazonS3URI deleteURI = storageAccountHelper.getAmazonS3URI(
-                        oldPhotoResource);
-                deleteKeyList.add(deleteURI.getKey());
+            	fileList.add(oldPhotoResource.getFilename());
             }
-            deleteKeyList.add(tmpDirectory + member.getPhotoFileName());
-            storageAccountHelper.multiFileDelete(containerName, deleteKeyList);
+        	storageAccountHelper.multiFileDelete("containerName", saveDirectory, fileList);
 
             // 顔写真ファイル名の更新を行う。
-            member.setRegisteredPhotoFileName(s3PhotoFileName);
+            member.setRegisteredPhotoFileName(storageAccountPhotoFileName);
             int updateCount = memberRepository.update(member);
             if (updateCount != 1) {
                 throw new SystemException(LogMessages.E_AR_A0_L9002

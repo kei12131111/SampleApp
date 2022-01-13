@@ -15,12 +15,12 @@
  */
 package jp.co.ntt.atrs.app.c2;
 
-import jp.co.ntt.atrs.app.c0.MemberHelper;
-import jp.co.ntt.atrs.domain.common.message.MessageKeys;
-import jp.co.ntt.atrs.domain.model.Member;
-import jp.co.ntt.atrs.domain.service.a1.AtrsUserDetails;
-import jp.co.ntt.atrs.domain.service.c2.MemberUpdateService;
+import java.io.IOException;
+import java.security.Principal;
 
+import javax.inject.Inject;
+
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -35,9 +35,13 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.terasoluna.gfw.common.exception.BusinessException;
 import org.terasoluna.gfw.common.message.ResultMessages;
 
-import java.security.Principal;
-
-import javax.inject.Inject;
+import jp.co.ntt.atrs.app.c0.MemberHelper;
+import jp.co.ntt.atrs.domain.azure.helper.StorageAccountHelper;
+import jp.co.ntt.atrs.domain.common.message.MessageKeys;
+import jp.co.ntt.atrs.domain.common.util.ImageFileBase64Encoder;
+import jp.co.ntt.atrs.domain.model.Member;
+import jp.co.ntt.atrs.domain.service.a1.AtrsUserDetails;
+import jp.co.ntt.atrs.domain.service.c2.MemberUpdateService;
 
 /**
  * 会員情報変更コントローラ。
@@ -47,6 +51,24 @@ import javax.inject.Inject;
 @RequestMapping("member/update")
 public class MemberUpdateController {
 
+    /**
+     * ストレージアカウントコンテナ名。
+     */
+    @Value("${upload.containerName}")
+    String containerName;
+
+    /**
+     * ファイル一時保存ディレクトリ。
+     */
+    @Value("${upload.temporaryDirectory}")
+    private String tmpDirectory;
+
+    /**
+     * ファイル保存ディレクトリ。
+     */
+    @Value("${upload.saveDirectory}")
+    private String saveDirectory;
+	
     /**
      * 会員情報変更サービス。
      */
@@ -64,6 +86,18 @@ public class MemberUpdateController {
      */
     @Inject
     MemberUpdateValidator memberUpdateValidator;
+    
+    /**
+     * 画像変換ユーティリティ。
+     */
+    @Inject
+    ImageFileBase64Encoder imageFileBase64Encoder;
+
+    /**
+     * StorageAccountHelper。
+     */
+    @Inject
+    StorageAccountHelper storageAccountHelper;
 
     /**
      * 会員情報変更フォームのバリデータをバインダに追加する。
@@ -89,9 +123,10 @@ public class MemberUpdateController {
      * @param model 出力情報を保持するクラス
      * @param principal ログイン情報を持つオブジェクト
      * @return View論理名
+     * @throws IOException
      */
     @RequestMapping(method = RequestMethod.GET, params = "form")
-    public String updateForm(Model model, Principal principal) {
+    public String updateForm(Model model, Principal principal) throws IOException{
 
         // ログインユーザ情報から会員番号を取得
         String membershipNumber = principal.getName();
@@ -176,9 +211,10 @@ public class MemberUpdateController {
      * @param model 出力情報を保持するクラス
      * @param principal ログイン情報を持つオブジェクト
      * @return View論理名
+     * @throws IOException 
      */
     @RequestMapping(method = RequestMethod.GET, params = "complete")
-    public String updateComplete(Model model, Principal principal) {
+    public String updateComplete(Model model, Principal principal) throws IOException {
 
         // 再検索して会員情報変更画面を表示
         return updateForm(model, principal);

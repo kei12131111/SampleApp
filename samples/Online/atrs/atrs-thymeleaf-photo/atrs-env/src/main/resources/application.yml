@@ -1,0 +1,11 @@
+# upload directories
+upload:
+  containerName: keisamplecontainer2
+  temporaryDirectory: tmp
+  saveDirectory: save
+
+azure:
+  storage:
+    account-name: keisamplestorageaccount # Storage account name length should be between 3 and 24 and use numbers and lower-case letters only
+    account-key: sM6prJmxmMNvDxA9k8a7bfy7/zSJzIkgcJo1BxALIdRb5Ec5dZvy7hHTNGZdxMdrNJz/G9+LDNDpw484BDcdXQ== # Fill storage account access key copied from portal
+    blob-endpoint: https://keisamplestorageaccount.blob.core.windows.net/keisamplecontainer2 # Fill storage blob endpoint URL copied from portal

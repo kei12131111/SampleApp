@@ -17,6 +17,7 @@ import org.springframework.core.io.support.ResourcePatternResolver;
 import org.springframework.stereotype.Component;
 
 import com.azure.spring.autoconfigure.storage.resource.AzureStorageResourcePatternResolver;
+import com.azure.spring.autoconfigure.storage.resource.BlobStorageResource;
 import com.azure.storage.blob.BlobContainerClient;
 import com.azure.storage.blob.BlobServiceClient;
 import com.azure.storage.blob.BlobServiceClientBuilder;
@@ -212,16 +213,16 @@ public class StorageAccountHelper {
 	public WritableResource getResource(String containerName, String putDirectory, String fileName) {
 
 		URI tempUri = null;
-
 		try {
 			tempUri = new URI("azure-blob://" + containerName + "/" + putDirectory + fileName);
+			
 		} catch (URISyntaxException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-//        AmazonS3URI tempUri = new AmazonS3URI(AWSConstants.S3_PROTOCOL_PREFIX
-//                .getConstants() + bucketName + "/" + putDirectory + fileName);
-		return (WritableResource) resourceLoader.getResource(tempUri.toString());
+		BlobStorageResource resource = (BlobStorageResource) this.resourceLoader.getResource(tempUri.toString());
+		return (WritableResource) resource;
+//		return (WritableResource) this.resourceLoader.getResource(tempUri.toString());
 	}
 
 	/**

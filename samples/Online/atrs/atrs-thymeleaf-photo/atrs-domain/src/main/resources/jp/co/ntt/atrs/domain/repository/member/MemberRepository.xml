@@ -24,6 +24,7 @@
     <result property="mail" column="mail"/>
     <result property="creditNo" column="credit_no"/>
     <result property="creditTerm" column="credit_term"/>
+    <result property="registeredPhotoFileName" column="photo_file_name" />
     <association property="creditType" resultMap="creditType-map" />
     <association property="memberLogin" resultMap="memberLogin-map"/>
   </resultMap>
@@ -96,6 +97,7 @@
         m.mail,
         m.credit_no,
         m.credit_term,
+        m.photo_file_name,
         m_l.password,
         m_l.last_password,
         m_l.login_date_time,
@@ -188,6 +190,10 @@
         credit_no = #{creditNo},
         credit_type_cd = #{creditType.creditTypeCd},
         credit_term = #{creditTerm}
+        <if test="registeredPhotoFileName != null">
+        ,photo_file_name =
+        #{registeredPhotoFileName}
+        </if>
     WHERE
         customer_no = #{membershipNumber}
   </update>

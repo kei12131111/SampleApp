@@ -15,18 +15,22 @@
  */
 package jp.co.ntt.atrs.domain.service.c1;
 
-import jp.co.ntt.atrs.domain.common.logging.LogMessages;
-import jp.co.ntt.atrs.domain.model.Member;
-import jp.co.ntt.atrs.domain.model.MemberLogin;
-import jp.co.ntt.atrs.domain.repository.member.MemberRepository;
+import java.util.UUID;
 
+import javax.inject.Inject;
+
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
 import org.terasoluna.gfw.common.exception.SystemException;
 
-import javax.inject.Inject;
+import jp.co.ntt.atrs.domain.azure.helper.StorageAccountHelper;
+import jp.co.ntt.atrs.domain.common.logging.LogMessages;
+import jp.co.ntt.atrs.domain.model.Member;
+import jp.co.ntt.atrs.domain.model.MemberLogin;
+import jp.co.ntt.atrs.domain.repository.member.MemberRepository;
 
 /**
  * 会員情報登録を行うService実装クラス。
@@ -36,6 +40,24 @@ import javax.inject.Inject;
 @Transactional
 public class MemberRegisterServiceImpl implements MemberRegisterService {
 
+    /**
+     * ストレージアカウントコンテナ名。
+     */
+    @Value("${upload.containerName}")
+    String containerName;
+
+    /**
+     * ファイル一時保存ディレクトリ。
+     */
+    @Value("${upload.temporaryDirectory}")
+    String tmpDirectory;
+
+    /**
+     * ファイル保存ディレクトリ。
+     */
+    @Value("${upload.saveDirectory}")
+    String saveDirectory;
+    
     /**
      * 会員情報リポジトリ。
      */
@@ -47,6 +69,12 @@ public class MemberRegisterServiceImpl implements MemberRegisterService {
      */
     @Inject
     PasswordEncoder passwordEncoder;
+    
+    /**
+     * StorageAccountHelper。
+     */
+    @Inject
+    StorageAccountHelper storageAccountHelper;
 
     /**
      * {@inheritDoc}
@@ -80,6 +108,24 @@ public class MemberRegisterServiceImpl implements MemberRegisterService {
         if (insertMemberLoginCount != 1) {
             throw new SystemException(LogMessages.E_AR_A0_L9002.getCode(), LogMessages.E_AR_A0_L9002
                     .getMessage(insertMemberLoginCount, 1));
+        }
+        
+        // ファイル保存を行う。
+        String storageAccountPhotoFileName = member.getMembershipNumber() + "_" + UUID
+                .randomUUID().toString() + ".jpg";
+        storageAccountHelper.fileCopy(containerName, tmpDirectory, member.getPhotoFileName(),
+        		containerName, saveDirectory, storageAccountPhotoFileName);
+
+        storageAccountHelper.fileDelete(containerName, tmpDirectory, member
+                .getPhotoFileName());
+
+        // ストレージアカウントに保存した顔写真ファイル名をデータベースに登録する。
+        member.setRegisteredPhotoFileName(storageAccountPhotoFileName);
+        int updateMemberCount = memberRepository.update(member);
+        if (updateMemberCount != 1) {
+            throw new SystemException(LogMessages.E_AR_A0_L9002
+                    .getCode(), LogMessages.E_AR_A0_L9002.getMessage(
+                            updateMemberCount, 1));
         }
 
         return member;
