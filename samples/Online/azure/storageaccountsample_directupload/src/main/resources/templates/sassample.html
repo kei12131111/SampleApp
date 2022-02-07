@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"
+integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4="
+crossorigin="anonymous"></script>
+</head>
+<body>
+    <input type="file" id="file" name="file"/>
+    <button type="button" id="uploadFile" onclick="">登録</button>
+
+
+<script>
+$("#uploadFile").on('click', function(){
+    var file = $('#file').prop('files')[0]; // (1)
+
+    var getAjax = function () {
+        var uploadFileName = file.name;
+        var dfd = new $.Deferred();
+
+        $.ajax({ // (2)
+            url: 'http://localhost:8080/readsas',
+            type: 'GET'
+        }).then(function(data) {
+        }).catch(function(jqXHR, textStatus, errorThrown) {
+            alert('error');
+        });
+        return dfd.promise();
+    }
+
+    var postAjax = function (getresult) {
+        var dfd = new $.Deferred();
+        var headers = new Headers();
+        headers.append('x-ms-version', '2020-10-02');
+        headers.append('x-ms-date', '2022-02-07');
+        headers.append('x-ms-blob-type', 'BlockBlob');
+        headers.append('Content-Type', 'text/plain');
+        alert(getresult);
+        $.ajax({ // (4)
+            url: 'aaa',
+            type: 'PUT',
+            headers: headers,
+            data: {
+                "name": "name",
+                "description": "description"
+            }
+        }).then(function(data, textStatus, jqXHR) {
+            alert('ok');           // omitted
+        }).catch(function(jqXHR, textStatus, errorThrown) {
+            alert(errorThrown);
+        });
+        return dfd.promise();
+    }
+
+    if (file) {
+        getAjax()
+        .then(postAjax)
+        .catch(function(jqXHR, textStatus, errorThrown, getresult) {
+            // omitted
+        });
+        
+        postAjax()
+        .catch(function(jqXHR, textStatus, errorThrown, getresult) {
+            // omitted
+        });
+
+    } else {
+        // omitted
+    }
+    return false;
+});
+</script>
+
+</body>
+</html>
