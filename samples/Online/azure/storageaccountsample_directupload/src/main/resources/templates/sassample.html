@@ -21,34 +21,45 @@ $("#uploadFile").on('click', function(){
         var dfd = new $.Deferred();
 
         $.ajax({ // (2)
-            url: 'http://localhost:8080/readsas',
+            url: 'http://localhost:8080/readsas?filename=' + uploadFileName,
             type: 'GET'
         }).then(function(data) {
+            dfd.resolve(data);
         }).catch(function(jqXHR, textStatus, errorThrown) {
             alert('error');
         });
         return dfd.promise();
     }
 
-    var postAjax = function (getresult) {
+    var putAjax = function (getresult) {
         var dfd = new $.Deferred();
-        var headers = new Headers();
-        headers.append('x-ms-version', '2020-10-02');
-        headers.append('x-ms-date', '2022-02-07');
-        headers.append('x-ms-blob-type', 'BlockBlob');
-        headers.append('Content-Type', 'text/plain');
-        alert(getresult);
+
+        var fileReader = new FileReader();
+        var fileContents;
+        fileReader.onload = function(e){
+
+	        fileContents = fileReader.result;
+        }
+
+        fileReader.readAsText(file);
+
+
+
+        alert(getresult.targetUrl);
         $.ajax({ // (4)
-            url: 'aaa',
+            url: getresult.targetUrl,
             type: 'PUT',
-            headers: headers,
-            data: {
-                "name": "name",
-                "description": "description"
-            }
+            headers: {
+                'x-ms-version' : getresult.xmsVersion,
+                'x-ms-date' : getresult.xmsDate,
+                'x-ms-blob-type' : getresult.xmsBlobType
+            },
+            data: fileContents
+
         }).then(function(data, textStatus, jqXHR) {
             alert('ok');           // omitted
         }).catch(function(jqXHR, textStatus, errorThrown) {
+            alert('error2'); 
             alert(errorThrown);
         });
         return dfd.promise();
@@ -56,15 +67,11 @@ $("#uploadFile").on('click', function(){
 
     if (file) {
         getAjax()
-        .then(postAjax)
+        .then(putAjax)
         .catch(function(jqXHR, textStatus, errorThrown, getresult) {
             // omitted
         });
         
-        postAjax()
-        .catch(function(jqXHR, textStatus, errorThrown, getresult) {
-            // omitted
-        });
 
     } else {
         // omitted

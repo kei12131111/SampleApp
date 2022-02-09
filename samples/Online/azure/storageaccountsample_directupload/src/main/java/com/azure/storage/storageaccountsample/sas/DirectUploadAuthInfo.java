@@ -4,25 +4,11 @@ public class DirectUploadAuthInfo {
 
     private String targetUrl;
 
-    private String acl;
+    private String xmsVersion;
 
-    private String policy;
+    private String xmsDate;
 
-    private String securityToken;
-
-    private String objectKey;
-
-    private String date;
-
-    private String algorithm;
-
-    private String credential;
-
-    private String signature;
-
-    private String rawFileName;
-
-    private String fileSizeLimit;
+    private String xmsBlobType;
 
 	public String getTargetUrl() {
 		return targetUrl;
@@ -32,84 +18,30 @@ public class DirectUploadAuthInfo {
 		this.targetUrl = targetUrl;
 	}
 
-	public String getAcl() {
-		return acl;
+	public String getXmsVersion() {
+		return xmsVersion;
 	}
 
-	public void setAcl(String acl) {
-		this.acl = acl;
+	public void setXmsVersion(String xmsVersion) {
+		this.xmsVersion = xmsVersion;
 	}
 
-	public String getPolicy() {
-		return policy;
+	public String getXmsDate() {
+		return xmsDate;
 	}
 
-	public void setPolicy(String policy) {
-		this.policy = policy;
+	public void setXmsDate(String xmsDate) {
+		this.xmsDate = xmsDate;
 	}
 
-	public String getSecurityToken() {
-		return securityToken;
+	public String getXmsBlobType() {
+		return xmsBlobType;
 	}
 
-	public void setSecurityToken(String securityToken) {
-		this.securityToken = securityToken;
+	public void setXmsBlobType(String xmsBlobType) {
+		this.xmsBlobType = xmsBlobType;
 	}
 
-	public String getObjectKey() {
-		return objectKey;
-	}
-
-	public void setObjectKey(String objectKey) {
-		this.objectKey = objectKey;
-	}
-
-	public String getDate() {
-		return date;
-	}
-
-	public void setDate(String date) {
-		this.date = date;
-	}
-
-	public String getAlgorithm() {
-		return algorithm;
-	}
-
-	public void setAlgorithm(String algorithm) {
-		this.algorithm = algorithm;
-	}
-
-	public String getCredential() {
-		return credential;
-	}
-
-	public void setCredential(String credential) {
-		this.credential = credential;
-	}
-
-	public String getSignature() {
-		return signature;
-	}
-
-	public void setSignature(String signature) {
-		this.signature = signature;
-	}
-
-	public String getRawFileName() {
-		return rawFileName;
-	}
-
-	public void setRawFileName(String rawFileName) {
-		this.rawFileName = rawFileName;
-	}
-
-	public String getFileSizeLimit() {
-		return fileSizeLimit;
-	}
-
-	public void setFileSizeLimit(String fileSizeLimit) {
-		this.fileSizeLimit = fileSizeLimit;
-	}
+    
 	
 }

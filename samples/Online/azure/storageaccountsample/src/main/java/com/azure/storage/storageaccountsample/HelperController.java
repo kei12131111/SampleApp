@@ -31,7 +31,7 @@ public class HelperController {
 		// "ランダムな文字 + temp.txt" のファイル名を作成
 		String fileName = UUID.randomUUID().toString() + "temp.txt";
 
-		try (InputStream inputStream = new ClassPathResource("sample2.txt").getInputStream()) {
+		try (InputStream inputStream = new ClassPathResource("sample.txt").getInputStream()) {
 			// ファイルアップロード
 			storageAccountHelper.fileUpload(inputStream, "keisamplecontainer", "tmp", fileName);
 

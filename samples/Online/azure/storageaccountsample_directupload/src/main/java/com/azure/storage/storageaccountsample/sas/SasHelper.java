@@ -31,7 +31,8 @@ public class SasHelper {
 	
 	public String getServiceSasUriForBlob() {
 		
-		BlobServiceClient blobServiceClient = new BlobServiceClientBuilder().connectionString(accountKey).buildClient();
+		String str = "DefaultEndpointsProtocol=https;AccountName=keisamplestorageaccount;AccountKey=lmvTLUqvWb/cUxmnZ8z/Hx5hnHgUuejcj3ySyS+EXSWiq7hKRbclaUJ5gaoTMXHrbSOuByZoaUJ4OnoD3S6SuQ==;EndpointSuffix=core.windows.net";
+		BlobServiceClient blobServiceClient = new BlobServiceClientBuilder().connectionString(str).buildClient();
 		 
 	    // SignedPermission (sp): AccountSasPermission.parse("rwacd") でも可
 	    var permissions = new AccountSasPermission()

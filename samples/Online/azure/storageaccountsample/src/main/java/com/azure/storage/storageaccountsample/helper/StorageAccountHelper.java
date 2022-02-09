@@ -5,16 +5,19 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.nio.charset.Charset;
 import java.util.List;
 import java.util.Locale;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.core.io.WritableResource;
 import org.springframework.core.io.support.ResourcePatternResolver;
 import org.springframework.stereotype.Component;
+import org.springframework.util.StreamUtils;
 
 import com.azure.spring.autoconfigure.storage.resource.AzureStorageResourcePatternResolver;
 import com.azure.storage.blob.BlobContainerClient;
@@ -81,6 +84,8 @@ public class StorageAccountHelper {
 	public void fileUpload(InputStream uploadFile, String containerName, String putDirectory, String fileName) {
 		WritableResource resource = getResource(containerName, putDirectory, fileName);
 		try (OutputStream out = resource.getOutputStream()) {
+//			String fileContent = StreamUtils.copyToString(new ClassPathResource("sample.txt").getInputStream(), Charset.defaultCharset()  );
+//			out.write(fileContent.getBytes());
 			// アップロードファイルの情報をOutputStreamへコピー
 			copy(uploadFile, out);
 		} catch (IOException e) {
