@@ -37,6 +37,10 @@
 			<groupId>com.azure.spring</groupId>
 			<artifactId>azure-spring-boot-starter-storage</artifactId>
 		</dependency>
+		<dependency>
+			<groupId>com.azure</groupId>
+			<artifactId>azure-identity</artifactId>
+		</dependency>
 
 	</dependencies>
 	<dependencyManagement>

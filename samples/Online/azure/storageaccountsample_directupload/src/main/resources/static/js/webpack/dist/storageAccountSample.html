@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Insert title here</title>
+</head>
+<body>
+    <button type="button" id="list-button">ファイルのリスト</button>
+    <br />
+    <br />
+    <p><b>ファイルのアップロード:</b></p>
+    <input type="file" id="file" name="file"/>
+    <button type="button" id="upload-file" onclick="">登録</button>
+    <p><b>Status:</b></p>
+    <p id="status" style="height:160px; width: 593px; overflow: scroll;" />
+    <p><b>Files:</b></p>
+    <select id="file-list" multiple style="height:222px; width: 593px; overflow: scroll;" >
+    </select>
+    <br />
+    <p><b>ファイルのダウンロード:</b></p>
+    <button type="button" id="download-file" onclick="">ダウンロード</button>
+    <p id="file-content" style="height:160px; width: 593px; overflow: scroll;" />
+
+</body>
+
+<script src="./main.js"></script>
+</html>
