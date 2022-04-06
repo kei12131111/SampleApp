@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:sec="http://www.springframework.org/schema/security"
+	xsi:schemaLocation="
+        http://www.springframework.org/schema/security https://www.springframework.org/schema/security/spring-security.xsd
+        http://www.springframework.org/schema/beans https://www.springframework.org/schema/beans/spring-beans.xsd
+    ">
+
+
+	<sec:http pattern="/resources/**" security="none" />
+<!-- 
+	<sec:http pattern="/api/v1/**" security="none" />
+-->	
+    <sec:http>
+		<sec:form-login />
+		<sec:intercept-url pattern="/login/**" access="permitAll" />
+		<sec:intercept-url pattern="/api/v1/todos" access="hasRole('ADMIN')" />
+		<sec:intercept-url pattern="/**" access="isAuthenticated()" />
+		<sec:logout />
+		<sec:csrf disabled="true"/>
+		<sec:access-denied-handler
+			ref="accessDeniedHandler" />
+		<sec:custom-filter ref="userIdMDCPutFilter"
+			after="ANONYMOUS_FILTER" />
+		<sec:session-management />
+	</sec:http>
+	
+	
+<!-- 
+	<sec:http>
+		<sec:form-login />
+		<sec:intercept-url pattern="/login/**"
+			access="permitAll" />
+		<sec:intercept-url pattern="/**"
+			access="isAuthenticated()" />
+		<sec:logout />
+		<sec:access-denied-handler
+			ref="accessDeniedHandler" />
+		<sec:custom-filter ref="userIdMDCPutFilter"
+			after="ANONYMOUS_FILTER" />
+		<sec:session-management />
+	</sec:http>
+
+
+	<sec:authentication-manager /> -->
+
+	<sec:authentication-manager>
+		<sec:authentication-provider>
+			<sec:user-service>
+				<sec:user name="demo" password="{pbkdf2}ebc7f251c4da48771442c55a0c64848983311eb663db01d8706403eee5f86eb30c1d0b24bc230aad" authorities="ROLE_USER" />
+			</sec:user-service>
+		</sec:authentication-provider>
+	</sec:authentication-manager>
+
+	<!-- 
+	<bean id="accessDeniedHandler"
+		class="org.springframework.security.web.access.DelegatingAccessDeniedHandler">
+		<constructor-arg index="0">
+			<map>
+				<entry
+					key="org.springframework.security.web.csrf.InvalidCsrfTokenException">
+					<bean
+						class="org.springframework.security.web.access.AccessDeniedHandlerImpl">
+						<property name="errorPage"
+							value="/common/error/invalidCsrfTokenError" />
+					</bean>
+				</entry>
+				<entry
+					key="org.springframework.security.web.csrf.MissingCsrfTokenException">
+					<bean
+						class="org.springframework.security.web.access.AccessDeniedHandlerImpl">
+						<property name="errorPage"
+							value="/common/error/missingCsrfTokenError" />
+					</bean>
+				</entry>
+			</map>
+		</constructor-arg>
+		<constructor-arg index="1">
+			<bean
+				class="org.springframework.security.web.access.AccessDeniedHandlerImpl">
+				<property name="errorPage"
+					value="/common/error/missingCsrfTokenError" />
+			</bean>
+		</constructor-arg>
+	</bean>
+	CSRF Protection -->
+	
+	<bean id="accessDeniedHandler"
+      class="com.example.todo.api.common.error.JsonDelegatingAccessDeniedHandler" />
+	
+
+	<!-- Put UserID into MDC -->
+	<bean id="userIdMDCPutFilter"
+		class="org.terasoluna.gfw.security.web.logging.UserIdMDCPutFilter">
+	</bean>
+
+</beans>

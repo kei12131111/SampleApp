@@ -1,0 +1,123 @@
+<html xmlns="http://www.w3.org/1999/xhtml" dir="ltr" lang="ja">
+  <head>
+    <meta http-equiv="Content-Security-Policy" content="default-src chrome:; object-src 'none'" />
+    <meta name="color-scheme" content="light dark" />
+    <title>ページ読み込みエラー</title>
+    <link rel="stylesheet" href="chrome://browser/skin/aboutNetError.css" type="text/css" media="all" />
+    <link rel="icon" id="favicon" href="chrome://global/skin/icons/info.svg" />
+    <link rel="localization" href="browser/aboutCertError.ftl" />
+    <link rel="localization" href="browser/nsserrors.ftl" />
+    <link rel="localization" href="branding/brand.ftl" />
+  </head>
+
+  <body dir="ltr" class="neterror">
+    <!-- ERROR ITEM CONTAINER (removed during loading to avoid bug 39098) -->
+    
+
+    <!-- PAGE CONTAINER (for styling purposes only) -->
+    <div id="errorPageContainer" class="container">
+      <div id="text-container">
+        <!-- Error Title -->
+        <div class="title">
+          <h1 class="title-text" data-l10n-id="connectionFailure-title">正常に接続できませんでした</h1>
+        </div>
+
+        <!-- LONG CONTENT (the section most likely to require scrolling) -->
+        <div id="errorLongContent">
+
+          <!-- Short Description -->
+          <div id="errorShortDesc">
+            <p id="errorShortDescText">localhost:8080 のサーバーへの接続を確立できませんでした。</p>
+          </div>
+
+          <div id="errorShortDesc2">
+              <p id="errorShortDescText2"></p>
+          </div>
+
+          <div id="errorWhatToDoTitle">
+              <p id="errorWhatToDoTitleText"></p>
+          </div>
+
+          <div id="errorWhatToDo">
+              <p id="badStsCertExplanation" hidden="true"><span class="hostname"></span> は HTTP Strict Transport Security (HSTS) と呼ばれるセキュリティポリシーが設定されており、Firefox は安全な接続でしか通信できません。そのため、このサイトを例外に追加することはできません。</p>
+              <p id="errorWhatToDoText"></p>
+          </div>
+
+          <div id="errorWhatToDo2">
+              <p id="errorWhatToDoText2"></p>
+              <p id="badStsCertExplanation" hidden="true"><span class="hostname"></span> は HTTP Strict Transport Security (HSTS) と呼ばれるセキュリティポリシーが設定されており、Firefox は安全な接続でしか通信できません。そのため、このサイトを例外に追加することはできません。</p>
+          </div>
+
+          <!-- Long Description (Note: See netError.dtd for used XHTML tags) -->
+          <div id="errorLongDesc">
+<ul xmlns="http://www.w3.org/1999/xhtml">
+  <li>このサイトが一時的に利用できなくなっていたり、サーバーの負荷が高すぎて接続できなくなっている可能性があります。しばらくしてから再度試してください。</li>
+  <li>他のサイトも表示できない場合、コンピューターのネットワーク接続を確認してください。</li>
+  <li>ファイアウォールやプロキシーでネットワークが保護されている場合、Firefox によるウェブアクセスが許可されているか確認してください。</li>
+</ul>
+</div>
+
+          <div id="tlsVersionNotice" hidden="true">
+            <p data-l10n-id="cert-error-old-tls-version">このウェブサイトは TLS 1.2 プロトコルをサポートしていない可能性があります。これは Firefox によりサポートされる最低バージョンです。</p>
+          </div>
+
+          <div id="learnMoreContainer">
+            <p><a id="learnMoreLink" target="_blank" rel="noopener noreferrer" data-telemetry-id="learn_more_link" href="https://support.mozilla.org/1/firefox/98.0.2/WINNT/ja/connection-not-secure">エラーの説明...</a></p>
+          </div>
+
+          <div id="openInNewWindowContainer" class="button-container">
+            <p><a id="openInNewWindowButton" target="_blank" rel="noopener noreferrer">
+            <button class="primary" data-l10n-id="open-in-new-window-for-csp-or-xfo-error">新しいウィンドウでサイトを開く</button></a></p>
+          </div>
+        </div>
+
+        <!-- UI for option to report certificate errors to Mozilla. Removed on
+             init for other error types .-->
+        <div id="prefChangeContainer" class="button-container">
+          <p>ネットワークセキュリティの設定がこの問題の原因になっている可能性があります。既定値に戻しますか？</p>
+          <button id="prefResetButton" class="primary">既定値に戻す</button>
+        </div>
+
+        <div id="certErrorAndCaptivePortalButtonContainer" class="button-container">
+          <button id="returnButton" class="primary" data-telemetry-id="return_button_top">戻る (推奨)</button>
+          <button id="openPortalLoginPageButton" class="primary">ネットワークのログインページを開く</button>
+          <button class="primary try-again">再試行</button>
+          <button id="advancedButton" data-telemetry-id="advanced_button">詳細情報...</button>
+        </div>
+      </div>
+
+      <div id="netErrorButtonContainer" class="button-container"><button class="primary try-again">再試行</button>
+        
+      </div>
+
+      <div id="advancedPanelContainer">
+        <div id="badCertAdvancedPanel" class="advanced-panel" hidden="">
+          <p id="badCertTechnicalInfo"></p>
+          <a id="viewCertificate" href="javascript:void(0)">証明書を確認</a>
+          <div id="advancedPanelButtonContainer" class="button-container">
+            <button id="advancedPanelReturnButton" class="primary" data-telemetry-id="return_button_adv">戻る (推奨)</button>
+            <button class="primary try-again">再試行</button>
+            <div class="exceptionDialogButtonContainer">
+              <button id="exceptionDialogButton" data-telemetry-id="exception_button">危険性を承知で続行</button>
+            </div>
+          </div>
+        </div>
+
+        <div id="blockingErrorReporting" class="advanced-panel" hidden="">
+            <p class="toggle-container-with-text">
+                <input type="checkbox" id="automaticallyReportBlockingInFuture" role="checkbox" />
+                <label for="automaticallyReportBlockingInFuture">エラーを報告すると、悪意のあるサイトの特定とブロックに役立ちます</label>
+            </p>
+        </div>
+
+        <div id="certificateErrorDebugInformation" class="advanced-panel" hidden="">
+          <button id="copyToClipboardTop" data-telemetry-id="clipboard_button_top">テキストをクリップボードにコピー</button>
+          <div id="certificateErrorText"></div>
+          <button id="copyToClipboardBottom" data-telemetry-id="clipboard_button_bot">テキストをクリップボードにコピー</button>
+        </div>
+      </div>
+    </div>
+  </body>
+  <script src="chrome://browser/content/certerror/aboutNetErrorCodes.js"></script>
+  <script type="module" src="chrome://browser/content/certerror/aboutNetError.js"></script>
+</html>

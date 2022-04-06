@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?><project-modules id="moduleCoreId" project-version="1.5.0">
+    <wb-module deploy-name="todo-api-mybatis3-multi-web">
+        <wb-resource deploy-path="/" source-path="/target/m2e-wtp/web-resources"/>
+        <wb-resource deploy-path="/" source-path="/src/main/webapp" tag="defaultRootSource"/>
+        <wb-resource deploy-path="/WEB-INF/classes" source-path="/src/main/java"/>
+        <wb-resource deploy-path="/WEB-INF/classes" source-path="/src/generated/java"/>
+        <wb-resource deploy-path="/WEB-INF/classes" source-path="/src/main/resources"/>
+        <dependent-module archiveName="todo-api-mybatis3-multi-domain-1.8.0.RELEASE.jar" deploy-path="/WEB-INF/lib" handle="module:/resource/todo-api-mybatis3-multi-domain/todo-api-mybatis3-multi-domain">
+            <dependency-type>uses</dependency-type>
+        </dependent-module>
+        <dependent-module archiveName="todo-api-mybatis3-multi-env-1.8.0.RELEASE.jar" deploy-path="/WEB-INF/lib" handle="module:/resource/todo-api-mybatis3-multi-env/todo-api-mybatis3-multi-env">
+            <dependency-type>uses</dependency-type>
+        </dependent-module>
+        <property name="context-root" value="todo-api-mybatis3-multi-web"/>
+        <property name="java-output-path" value="/todo-api-mybatis3-multi-web/target/classes"/>
+    </wb-module>
+</project-modules>
