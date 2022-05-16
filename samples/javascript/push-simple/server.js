@@ -1,32 +1,34 @@
 const webPush = require('web-push');
-//var http = require('http');
-//var app = http.createServer();
-
+const bodyParser = require('body-parser');
 var express = require('express');
 var app = express();
 
-
-if (!process.env.VAPID_PUBLIC_KEY || !process.env.VAPID_PRIVATE_KEY) {
-  console.log("You must set the VAPID_PUBLIC_KEY and VAPID_PRIVATE_KEY "+
-    "environment variables. You can use the following ones:");
-  console.log(webPush.generateVAPIDKeys());
-  return;
-}
+var strPushSubscription;
+var subscription;
 
 
+// POSTリクエストのjsonのbodyを扱う
+app.use(bodyParser.urlencoded({ extended: true }));
+app.use(bodyParser.json());
 
+
+// key生成用。特に使わなくてよい
+app.get('/key', function (req, res) {
+  res.send(JSON.stringify(webPush.generateVAPIDKeys()));
+  res.sendStatus(200);
+});
+
+
+// key情報をwebpushへ詰め込む
 webPush.setVapidDetails(
-  'https://serviceworke.rs/',
-  process.env.VAPID_PUBLIC_KEY,
-  process.env.VAPID_PRIVATE_KEY
+  "mailto:sample@sample.com",
+  "BDAvo4RGEXpgAY9gUPQGUI3Gt2qr9Cw3IE1yqHprcOHy0jh3odEBObhx5AJqLAxvraTz2sJVvIxT6vBhmqx6jFE",
+  "xyECeKdDAjOJ07lnJZxEjLEYyiI7QDW3yHsOK8z6XpE"
 );
 
-//module.exports = function(app, route) {
-  app.get('/vapidPublicKey', function(req, res) {
-    res.send(process.env.VAPID_PUBLIC_KEY);
-  });
 
-app.options('/subscribe', function (req, res) {
+// cors対策
+app.options('/*', function (req, res) {
   res.header('Access-Control-Allow-Origin', '*')
   res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS')
   res.header(
@@ -36,55 +38,38 @@ app.options('/subscribe', function (req, res) {
   res.sendStatus(200);
 });
 
+// clientからsubscriptionを取得する
+app.post('/subscribe', function(req, res) {
+	res.header('Access-Control-Allow-Origin', '*')
+	res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE')
+	res.header(
+	  'Access-Control-Allow-Headers',
+	  'Content-Type, Authorization, access_token'
+	)
+	
+	
+	strPushSubscription = JSON.stringify(req.body);
+	res.sendStatus(201);
+});
 
-  app.post('/subscribe', function(req, res) {
-  res.header('Access-Control-Allow-Origin', '*')
-  res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE')
-  res.header(
-    'Access-Control-Allow-Headers',
-    'Content-Type, Authorization, access_token'
-  )
+app.post('/pushNotification', function(req, res) {
+	res.header('Access-Control-Allow-Origin', '*')
+	res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE')
+	res.header(
+	  'Access-Control-Allow-Headers',
+	  'Content-Type, Authorization, access_token'
+	)
+    subscription = req.body;
+    
+    // 今回は使わないが、payload設定できる
+	const payload = JSON.stringify({
+	  title: "プッシュ通知のテスト"
+	});	
 
-  // intercept OPTIONS method
-  if ('OPTIONS' === req.method) {
-    res.send(200)
-  }
-
-    res.sendStatus(201);
-  });
-
-  app.post('/sendNotification', function(req, res) {
-    res.header('Access-Control-Allow-Origin', '*')
-  res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS')
-  res.header(
-    'Access-Control-Allow-Headers',
-    'Content-Type, Authorization, access_token'
-  )
+	// 通知をpush serviceに依頼
+	webPush.sendNotification(subscription, payload);
+	res.sendStatus(201);
+});
 
 
-
-
-  // intercept OPTIONS method
-  if ('OPTIONS' === req.method) {
-    res.send(200)
-  }
-    const subscription = req.body.subscription;
-    const payload = null;
-    const options = {
-      TTL: req.body.ttl
-    };
-
-    setTimeout(function() {
-      webPush.sendNotification(subscription, payload, options)
-      .then(function() {
-        res.sendStatus(201);
-      })
-      .catch(function(error) {
-        res.sendStatus(500);
-        console.log(error);
-      });
-    }, req.body.delay * 1000);
-  });
-//};
-
-app.listen(3000);
+app.listen(3100);
