@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:sec="http://www.springframework.org/schema/security"
+    xsi:schemaLocation="
+        http://www.springframework.org/schema/security https://www.springframework.org/schema/security/spring-security.xsd
+        http://www.springframework.org/schema/beans https://www.springframework.org/schema/beans/spring-beans.xsd
+    ">
+
+    
+    <sec:http pattern="/resources/**" security="none" />
+
+    <!--
+    <sec:http pattern="/api/v1/**" security="none" />
+ (1) -->
+    <sec:http>
+        <sec:form-login/>
+        <sec:logout/>
+        <sec:intercept-url pattern="/**" access="permitAll" />  <!-- (1) -->
+        <sec:access-denied-handler ref="accessDeniedHandler"/>
+        <sec:custom-filter ref="userIdMDCPutFilter" after="ANONYMOUS_FILTER"/>
+        <sec:session-management />
+        <sec:csrf token-repository-ref="tokenRepository"/>
+        <sec:cors configuration-source-ref="corsSource" />
+    </sec:http>
+
+    <sec:authentication-manager />
+
+	<bean id="tokenRepository"
+		class="org.springframework.security.web.csrf.CookieCsrfTokenRepository" >
+		<!-- 
+		<property name="cookieHttpOnly" value="false" /> -->
+	</bean>
+
+    <!-- CSRF Protection -->
+    <bean id="accessDeniedHandler"
+        class="org.springframework.security.web.access.DelegatingAccessDeniedHandler">
+        <constructor-arg index="0">
+            <map>
+                <entry
+                    key="org.springframework.security.web.csrf.InvalidCsrfTokenException">
+                    <bean
+                        class="org.springframework.security.web.access.AccessDeniedHandlerImpl">
+                        <property name="errorPage"
+                            value="/common/error/invalidCsrfTokenError" />
+                    </bean>
+                </entry>
+                <entry
+                    key="org.springframework.security.web.csrf.MissingCsrfTokenException">
+                    <bean
+                        class="org.springframework.security.web.access.AccessDeniedHandlerImpl">
+                        <property name="errorPage"
+                            value="/common/error/missingCsrfTokenError" />
+                    </bean>
+                </entry>
+            </map>
+        </constructor-arg>
+        <constructor-arg index="1">
+            <bean
+                class="org.springframework.security.web.access.AccessDeniedHandlerImpl">
+                <property name="errorPage"
+                    value="/common/error/accessDeniedError" />
+            </bean>
+        </constructor-arg>
+    </bean>
+
+
+    <bean id="corsConfiguration" class="org.springframework.web.cors.CorsConfiguration">
+        <property name="allowedOrigins">
+            <list>
+                <value>http://localhost:8080/</value>
+            </list>
+        </property>
+        <property name="allowedMethods">
+            <list>
+                <value>GET</value>
+                <value>POST</value>
+            </list>
+        </property>
+    </bean>
+
+    <bean id="corsSource" class="org.springframework.web.cors.UrlBasedCorsConfigurationSource">
+        <property name="corsConfigurations">
+            <map>
+                <entry key="/*"  value-ref="corsConfiguration" />
+            </map>
+        </property>
+    </bean>
+    
+    <!-- Put UserID into MDC -->
+    <bean id="userIdMDCPutFilter" class="org.terasoluna.gfw.security.web.logging.UserIdMDCPutFilter">
+    </bean>
+
+</beans>
